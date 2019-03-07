@@ -1,0 +1,96 @@
+## mysql image version
+## ref: https://hub.docker.com/r/library/mysql/tags/
+##
+mysqlImage: "registry.cn-beijing.aliyuncs.com/hiacloud/mysql:5.7.22"
+xtraBackupImage: "registry.cn-beijing.aliyuncs.com/hiacloud/percona-xtrabackup:1.0.1"
+
+
+replicaCount: 3
+
+## Password for MySQL root user
+##
+# mysqlRootPassword: ## Default: random 10 character string
+mysqlRootPassword: 123456aB
+## Username/password for MySQL replication user
+##
+mysqlReplicationUser: repl
+mysqlReplicationPassword: repl
+
+## Create a database user
+##
+# mysqlUser:
+# mysqlPassword: ## Default: random 10 character string
+
+
+## Allow unauthenticated access, uncomment to enable
+##
+mysqlAllowEmptyPassword: false
+
+## Create database with name and grant all permissions to user on startup, if needed
+# mysqlDatabase:
+
+## Enable persistence using Persistent Volume Claims
+## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+##
+persistence:
+  enabled: true
+  ## If defined, volume.beta.kubernetes.io/storage-class: <storageClass>
+  ##
+  accessMode: ReadWriteOnce
+  storageClass: "gluster-heketi-hollysys"
+  size: 8Gi
+  annotations: {}
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 100m
+    memory: 512Mi
+## Configure the service
+## ref: http://kubernetes.io/docs/user-guide/services/
+service:
+  ## Specify a service type
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services---service-types
+  type: ClusterIP
+  #type: NodePort
+  port: 3306
+  #nodePort: 32000
+mysqlConfig:
+  master.cnf: |-
+    [mysqld]
+    log-bin
+    skip_name_resolve
+    character_set_server=utf8
+    innodb_buffer_pool_size=1G
+    sync_binlog=0
+    lower_case_table_names=1
+    innodb_file_per_table=1
+    max_connections=500
+    back_log=150
+    max_user_connections=150
+    innodb_flush_log_at_trx_commit=2
+    innodb_log_files_in_group=3
+    slow_query_log=1
+    long_query_time=2
+    slow_query_log_file=/var/log/mysql/slow.log
+    innodb_log_file_size=128M
+    [mysqld_safe]
+    syslog
+  slave.cnf: |-
+    [mysqld]
+    super-read-only
+    skip_name_resolve
+    character_set_server=utf8
+    innodb_buffer_pool_size=1G
+    sync_binlog=0
+    lower_case_table_names=1
+    innodb_file_per_table=1
+    max_connections=500
+    innodb_flush_log_at_trx_commit=2
+    innodb_log_files_in_group=3
+    slow_query_log=1
+    long_query_time=2
+    slow_query_log_file=/var/log/mysql/slow.log
+    innodb_log_file_size=128M

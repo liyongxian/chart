@@ -1,0 +1,17 @@
+{{- $fullname := include "fullname" . -}}
+#### 欢迎使用MySQL服务
+
+本服务提供一个具有{{ .Values.replicaCount }}个节点的MySQL副本集集群，你可以在Kubernetes集群中通过以下访问信息来访问集群：
+
++ **访问地址：**
+{{ printf "  + %s-%d.%s" $fullname 0 $fullname }}.{{ .Release.Namespace }}.svc.cluster.local
++ **访问端口：**3306
++ **管理员用户：**root
++ **管理员初始密码：**{{ .Values.mysqlRootPassword }}
+  
+  `注意：管理员密码为初始密码，为保证安全，请实例新建完成后自行修改，并牢记修改后的密码；密码一旦丢失将无法找回。`
+
+通过**参数管理**功能可以对MySQL集群进行配置，集群的所有节点使用相同的配置文件。
+关于MySQL的详细配置信息，请参考[MySQL配置官方说明](https://dev.mysql.com/doc/refman/5.7/en/)
+
+通过**控制台**功能可以使用Web版的命令行工具访问指定的数据库节点
