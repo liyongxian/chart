@@ -33,7 +33,7 @@ mysqlAllowEmptyPassword: false
 ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
 ##
 persistence:
-enabled: true
+  enabled: true
   ## If defined, volume.beta.kubernetes.io/storage-class: <storageClass>
   ##
   accessMode: ReadWriteOnce
