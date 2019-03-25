@@ -1,0 +1,10 @@
+apiVersion: v1
+name: timeseries
+engine: gotpl
+version: 1.0.0
+description: A Helm chart for timeseries-chart
+maintainers:
+  - name: hollysys
+    email: test@hollysys.com
+icon: https://www.mysql.com/logo-mysql-170x115.png
+appVersion: v1.0.0

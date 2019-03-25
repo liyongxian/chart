@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "timeseries.fullname" . }}-haier-query
+  labels:
+    app: {{ template "timeseries.name" . }}-haier-query
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 0
+  template:
+    metadata:
+      labels:
+        app: {{ template "timeseries.name" . }}-haier-query
+        release: {{ .Release.Name }}
+    spec:
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+      - name: zoneinfo-config
+        hostPath:
+          path: /usr/share/zoneinfo
+      containers:
+      - name: {{ .Chart.Name }}-haier-query
+        image: registry.cn-beijing.aliyuncs.com/hiacloud/ts-haier-query:ga-v3.0.4
+        imagePullPolicy: Always
+        ports:
+        - containerPort: {{ .Values.service.haierquery.internalPort }}
+        env:
+        - name: TSQ_CONF_URL
+          value: "http://configserver-configserver.public.svc.cluster.local:8001/ts-query-service/test/master/application.conf"
+        - name: TSQ_HOST_URL
+          value: "http://configserver-configserver.public.svc.cluster.local:8001/ts-query-service/test/master/host.txt"
+        - name: TZ
+          value: Asia/Shanghai
+        volumeMounts:
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: zoneinfo-config
+          mountPath: /usr/share/zoneinfo
+        resources:
+{{ toYaml .Values.resources.haierquery | indent 12 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}

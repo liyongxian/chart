@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "timeseries.fullname" . }}
+  labels:
+{{ include "labels.standard" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "timeseries.name" . }}
+        release: {{ .Release.Name }}
+        version: {{ .Chart.AppVersion }}
+    spec:
+      volumes:
+      - name: tz-config
+        hostPath:
+          path: /usr/share/zoneinfo/Asia/Shanghai
+      - name: zoneinfo-config
+        hostPath:
+          path: /usr/share/zoneinfo
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.internalPort }}
+        env:
+        - name: TSQ_CONF_URL
+          value: "{{ .Values.env.TSQ_CONF_URL }}"
+        - name: TSQ_HOST_URL
+          value: "{{ .Values.env.TSQ_HOST_URL }}"
+        - name: TZ
+          value: Asia/Shanghai
+        - name: SERVICE_MODEL_ADDRESS
+          value: "{{ .Values.env.SERVICE_MODEL_ADDRESS }}"
+        volumeMounts:
+        - name: tz-config
+          mountPath: /etc/localtime
+        - name: zoneinfo-config
+          mountPath: /usr/share/zoneinfo
+        resources:
+{{ toYaml .Values.resources.tsquery | indent 12 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}

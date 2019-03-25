@@ -1,0 +1,30 @@
+{{- if .Values.ingress.enabled -}}
+{{- $ServiceName := include "service.name" . -}}
+{{- $tsQueryServicePort := .Values.service.externalPort -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "timeseries.fullname" . }}
+  labels:
+{{ include "labels.standard" . | indent 4 }}
+  annotations:
+    {{- range $key, $value := .Values.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  rules:
+   {{- range $host := .Values.ingress.hosts }}
+    - host: {{ $host }}
+#     - host: ts.hiatest.tk
+      http:
+        paths:
+          - path: /ts
+            backend:
+              serviceName: {{ $ServiceName }}-svc
+              servicePort: {{ $tsQueryServicePort }}
+   {{- end -}}
+ {{- if .Values.ingress.tls }}
+  tls:
+{{ toYaml .Values.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}
